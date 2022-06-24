@@ -1,0 +1,166 @@
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <title>Coffee Ordering App</title>
+      <link rel="stylesheet" href="assets/styles.css">
+      <link rel="preconnect" href="https://fonts.gstatic.com">
+      
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+      <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Inter:wght@300&display=swap" rel="stylesheet">
+   </head>
+   <body>
+      <div class="content">
+         <div class="container">
+            <div class="header">
+               <h1>
+                  <svg width="60" height="60" style="padding-right: 12px;"
+                     xmlns="http://www.w3.org/2000/svg">
+                     <image href="assets/coffee.svg" height="60" width="60"/>
+                  </svg>
+                  Coffee Ordering App
+               </h1>
+            </div>
+            <h2>Coffee</h2>
+            <div class="coffee-deck">
+               <div class="tile" id="cappuccino" onclick="setCoffee('cappuccino')">
+                  <img src="assets/drinks-cappuccino.jpg"height="170px" />
+                  <div class="item-title">Cappuccino     <sup>£5.00 | $6.28</sup></div>
+               </div>
+               <div  class="tile" id="latte" onclick="setCoffee('latte')">
+                  <img src="assets/drinks-latte.jpg"height="170px"/>
+                  <div class="item-title">Latte<sup>£5.00 | $6.28</sup></div>
+               </div>
+               <div class="tile" id="americano" onclick="setCoffee('americano')" >
+                  <img src="assets/drinks-americano.jpg" height="170px"/>
+                  <div class="item-title">Americano<sup>£5.00 | $6.28</sup></div>
+               </div>
+            </div>
+            <h2>Desserts</h2>
+            <div class="desserts-deck">
+               <div  class="tile" id="cheesecake" onclick="setDessert('cheesecake')" >
+                  <img src="assets/dessert-cheesecake.jpg"height="170px" />
+                  <div class="item-title">Cheesecake<sup>£6.00 | $7.54</sup></div>
+               </div>
+               <div  class="tile" id="brownie" onclick="setDessert('brownie')">
+                  <img src="assets/dessert-brownie.jpg" height="170px"/>
+                  <div class="item-title">Brownie<sup>£6.00 | $7.54</sup></div>
+               </div>
+               <div class="tile" id="apple pie" onclick="setDessert('apple pie')">
+                  <img src="assets/dessert-apple-pie.jpg" height="170px"/>
+                  <div class="item-title">Apple pie<sup>£6.00 |$7.54</sup></div>
+               </div>
+            </div>
+         </div>
+         <div class="forms">
+            <div class="h2forms">Checkout</div>
+            <h3 class="h3forms">Your Order</h3>
+            <div id="order">
+               <div id="coffee" class="item-title"></div>
+               <div id="dessert" class="item-title"></div>
+            </div>
+            <hr>
+            <h3 class="h3forms">Your Info</h3>
+            <form action="/action_page.php" method="get" name="myForm">
+
+
+
+               <label for="name" class="form-label">Name</label>
+               <input type="text" id="name" name="name" class="form-field">
+
+
+
+               <label for="address" class="form-label">Address</label>
+               <input type="text" id="address" name="address" class="form-field">
+
+
+               
+               <input type="button" value="Purchase" class="form-btn" onclick="sendData()">
+            </form>
+         </div>
+      </div>
+      <script>
+         let coffee = '';
+         let dessert = '';
+         let order = {};
+         
+         function setCoffee(coffee) {      
+             // Adding the order to the cart
+             document.getElementById("coffee").innerHTML = coffee.charAt(0).toUpperCase() + coffee.slice(1);
+            order["coffee"] = coffee;
+            alanBtnInstance.setVisualState({order});
+             // Highlighting tiles
+             let item = coffee.toLowerCase();
+             highlightProduct(item);
+         }         
+         
+         function setDessert(dessert) {    
+             // Adding the order to the cart
+             document.getElementById("dessert").innerHTML = dessert.charAt(0).toUpperCase() + dessert.slice(1);
+             order["dessert"] = dessert;
+             alanBtnInstance.setVisualState({order});
+             // Highlighting tiles
+             let item = dessert.replace(/\s+/g, '-').toLowerCase();
+             highlightProduct(item);
+         }
+         
+         function highlightProduct(item) {
+            const el = document.getElementById(item);
+            if (el) {
+               [...el.parentElement.children].forEach(sib => sib.classList.remove('highlighted'));
+               el.classList.add('highlighted');               
+            }
+         };
+
+
+         function sendData() {
+            alanBtnInstance.activate();
+            alanBtnInstance.callProjectApi("getOrder", {
+               coffee: order.coffee,
+               dessert: order.dessert,
+               name: document.getElementById('name').value,
+               address: document.getElementById('address').value
+            }, function(error, result){ 
+               console.log(error)
+            });
+         }
+
+
+         
+      </script>
+      <div class="alan-btn btn-alan"></div>
+      <script type="text/javascript"
+      src="https://studio.alan.app/web/lib/alan_lib.min.js"></script>
+     <script>
+       var alanBtnInstance = alanBtn({
+         key: "f960202cd68473a1d3eae5d8790d04c52e956eca572e1d8b807a3e2338fdd0dc/testing",
+         onCommand: function (commandData) {
+           if (commandData.command === "highlight") {
+             highlightProduct(commandData.item)
+           }
+           else if (commandData.command === "addCoffee"){
+              setCoffee(commandData.item)
+           }
+           else if (commandData.command === "addDessert"){
+              setDessert(commandData.item)
+           }
+           else if (commandData.command === "addName"){
+              document.getElementById("name").value= commandData.name
+           }
+           else if (commandData.command === "addLoc"){
+              document.getElementById("address").value= commandData.loc
+           }
+         },
+         onButtonState: async function(status) {
+            if (status === 'ONLINE')  {
+               await alanBtnInstance.activate();
+               document.getElementById("name").value= ""
+               document.getElementById("address").value= ""
+               alanBtnInstance.playText('Hi, This is Alan, For this website to help You to order your coffee with a dessert, Start by saying Hi to me')
+            }
+         },
+         rootEl: document.getElementById("alan-btn"),
+       });
+     </script>
+   </body>
+</html>
